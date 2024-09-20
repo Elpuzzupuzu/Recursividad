@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora Recursiva</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>Calculadora Recursiva</h1>
+    
+    <!-- Formulario para Factorial -->
+    <h2>Factorial</h2>
+    <form id="factorialForm">
+        <label for="factorialInput">Número:</label>
+        <input type="number" id="factorialInput" required min="0">
+        <button type="submit">Calcular Factorial</button>
+    </form>
+    <p id="factorialResult"></p>
+
+
+    <h2>Calcular Potencia</h2>
+    <form id="potenciaForm">
+        <label for="baseInput">Base:</label>
+        <input type="number" step="any" id="baseInput" required>
+        <br>
+        <label for="exponenteInput">Exponente:</label>
+        <input type="number" id="exponenteInput" required min="0">
+        <br>
+        <button type="submit">Calcular Potencia</button>
+    </form>
+    <p id="potenciaResult"></p>
+    
+
+        
+
+    <!-- Formulario para Fibonacci -->
+    <h2>Fibonacci</h2>
+    <form id="fibonacciForm">
+        <label for="fibonacciInput">Número:</label>
+        <input type="number" id="fibonacciInput" required min="0">
+        <button type="submit">Calcular Fibonacci</button>
+    </form>
+    <p id="fibonacciResult"></p>
+
+    <!-- Formulario para MCD -->
+    <h2>Máximo Común Divisor (MCD)</h2>
+    <form id="mcdForm">
+        <label for="mcdInputA">Número A:</label>
+        <input type="number" id="mcdInputA" required min="0">
+        <br>
+        <label for="mcdInputB">Número B:</label>
+        <input type="number" id="mcdInputB" required min="0">
+        <br>
+        <button type="submit">Calcular MCD</button>
+    </form>
+    <p id="mcdResult"></p>
+
+<!-- Formulario para Cambio Mínimo -->
+<h2>Cambio Mínimo</h2>
+<form id="cambioForm">
+    <label for="cambioInputMonto">Monto a Cobrar:</label>
+    <input type="number" step="0.01" id="cambioInputMonto" required min="0">
+    <br>
+    <label for="cambioInputPago">Monto Pagado:</label>
+    <input type="number" step="0.01" id="cambioInputPago" required min="0">
+    <br>
+    <button type="submit">Calcular Cambio</button>
+</form>
+<p id="cambioResult"></p>
+
+        
+
+
+
+
+
+    <!-- Formulario para Torres de Hanoi -->
+    <h2>Torres de Hanoi</h2>
+    <form id="hanoiForm">
+        <label for="hanoiInput">Número de Discos:</label>
+        <input type="number" id="hanoiInput" required min="1" max="8">
+        <button type="submit">Resolver Torres de Hanoi</button>
+    </form>
+    <p id="hanoiResult"></p>
+
+    <script>
+        // Calcula el Factorial
+        document.getElementById('factorialForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const number = document.getElementById('factorialInput').value;
+            try {
+                const response = await fetch(`http://localhost:3000/factorial/${number}`);
+                const result = await response.json();
+                document.getElementById('factorialResult').innerText = `Factorial de ${result.number} es ${result.factorial}`;
+            } catch (error) {
+                document.getElementById('factorialResult').innerText = `Error: ${error.message}`;
+            }
+        });
+
+        // Calcula la Serie de Fibonacci
+        document.getElementById('fibonacciForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const number = document.getElementById('fibonacciInput').value;
+            try {
+                const response = await fetch(`http://localhost:3000/fibonacci/${number}`);
+                const result = await response.json();
+                document.getElementById('fibonacciResult').innerText = `Fibonacci de ${result.number} es ${result.fibonacci}`;
+            } catch (error) {
+                document.getElementById('fibonacciResult').innerText = `Error: ${error.message}`;
+            }
+        });
+
+        // Calcula el MCD
+        document.getElementById('mcdForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const a = document.getElementById('mcdInputA').value;
+            const b = document.getElementById('mcdInputB').value;
+            try {
+                const response = await fetch(`http://localhost:3000/mcd/${a}/${b}`);
+                const result = await response.json();
+                document.getElementById('mcdResult').innerText = `MCD de ${result.a} y ${result.b} es ${result.mcd}`;
+            } catch (error) {
+                document.getElementById('mcdResult').innerText = `Error: ${error.message}`;
+            }
+        });
+
+       
+        // Calcula el Cambio Mínimo
+        document.getElementById('cambioForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const monto = document.getElementById('cambioInputMonto').value;
+    const pago = document.getElementById('cambioInputPago').value;
+
+    try {
+        const response = await fetch('http://localhost:3000/cambio', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                monto: monto,
+                pago: pago
+            })
+        });
+        const result = await response.json();
+
+        if (result.error) {
+            document.getElementById('cambioResult').innerText = `Error: ${result.error}`;
+        } else {
+            // Formatear el cambio como un string
+            const cambioDetalle = Object.entries(result.cambio)
+                .map(([denom, cantidad]) => `${cantidad} moneda(s) de ${denom}`)
+                .join(', ');
+
+            // Mostrar la lista de monedas mínimas
+            const listaDeMonedas = result.listaDeMonedas.join(', ');
+
+            document.getElementById('cambioResult').innerHTML = `
+                Cambio para ${result.pago} con un monto de ${result.monto} es: <br>
+                Monto de Cambio: ${result.montoCambio} <br>
+                Detalle del Cambio: ${cambioDetalle} <br>
+                Total de Monedas: ${result.totalMonedas} <br>
+                Lista de Monedas Mínimas: ${listaDeMonedas}
+            `;
+        }
+    } catch (error) {
+        document.getElementById('cambioResult').innerText = `Error: ${error.message}`;
+    }
+});
+
+
+
+
+
+        // Resuelve las Torres de Hanoi
+        document.getElementById('hanoiForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const discos = document.getElementById('hanoiInput').value;
+            try {
+                const response = await fetch(`http://localhost:3000/hanoi/${discos}`);
+                const result = await response.json();
+                const movimientos = result.movimientos.join('\n');
+                document.getElementById('hanoiResult').innerText = `Movimientos para ${result.discos} discos:\n${movimientos}`;
+            } catch (error) {
+                document.getElementById('hanoiResult').innerText = `Error: ${error.message}`;
+            }
+        });
+
+
+        document.getElementById('potenciaForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const base = document.getElementById('baseInput').value;
+    const exponente = document.getElementById('exponenteInput').value;
+
+    try {
+        const response = await fetch(`http://localhost:3000/potencia/${base}/${exponente}`);
+        const result = await response.json();
+
+        if (result.error) {
+            document.getElementById('potenciaResult').innerText = `Error: ${result.error}`;
+        } else {
+            document.getElementById('potenciaResult').innerText = 
+                `La potencia de ${result.base} elevado a ${result.exponente} es ${result.resultado}`;
+        }
+    } catch (error) {
+        document.getElementById('potenciaResult').innerText = `Error: ${error.message}`;
+    }
+});
+
+
+
+    </script>
+</body>
+</html>
